@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HexRaysDeob", "HexRaysDeob.vcxproj", "{5EF5C070-D860-43CF-A65C-3934E448C8F2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		ida32 Debug|x64 = ida32 Debug|x64
+		ida32 Debug|x86 = ida32 Debug|x86
+		ida64 Debug|x64 = ida64 Debug|x64
+		ida64 Debug|x86 = ida64 Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5EF5C070-D860-43CF-A65C-3934E448C8F2}.ida32 Debug|x64.ActiveCfg = ida32 Debug|x64
+		{5EF5C070-D860-43CF-A65C-3934E448C8F2}.ida32 Debug|x64.Build.0 = ida32 Debug|x64
+		{5EF5C070-D860-43CF-A65C-3934E448C8F2}.ida32 Debug|x86.ActiveCfg = ida32 Debug|Win32
+		{5EF5C070-D860-43CF-A65C-3934E448C8F2}.ida32 Debug|x86.Build.0 = ida32 Debug|Win32
+		{5EF5C070-D860-43CF-A65C-3934E448C8F2}.ida64 Debug|x64.ActiveCfg = ida64 Debug|x64
+		{5EF5C070-D860-43CF-A65C-3934E448C8F2}.ida64 Debug|x64.Build.0 = ida64 Debug|x64
+		{5EF5C070-D860-43CF-A65C-3934E448C8F2}.ida64 Debug|x86.ActiveCfg = ida64 Debug|Win32
+		{5EF5C070-D860-43CF-A65C-3934E448C8F2}.ida64 Debug|x86.Build.0 = ida64 Debug|Win32
+		{5EF5C070-D860-43CF-A65C-3934E448C8F2}.Release|x64.ActiveCfg = Release|x64
+		{5EF5C070-D860-43CF-A65C-3934E448C8F2}.Release|x64.Build.0 = Release|x64
+		{5EF5C070-D860-43CF-A65C-3934E448C8F2}.Release|x86.ActiveCfg = Release|Win32
+		{5EF5C070-D860-43CF-A65C-3934E448C8F2}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {82CCB6F1-6963-45C3-8EFA-C8068710E082}
+	EndGlobalSection
+EndGlobal
