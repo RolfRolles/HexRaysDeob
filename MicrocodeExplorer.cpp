@@ -153,6 +153,11 @@ protected:
 			Insert(op.pair->hop, iThisBlock, 1);
 			break;
 		}
+		case mop_a: // result of another instruction
+		{
+			int iDestBlock = Insert(*op.a, iThisBlock, 0);
+			break;
+		}
 		}
 		return iThisBlock;
 	}
