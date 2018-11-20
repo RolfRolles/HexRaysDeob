@@ -167,7 +167,11 @@ struct ObfCompilerOptimizer : public optinsn_t
 		// If we get here, the pattern matched.
 		// Replace the whole multiplication instruction by 0.
 		ins->l.make_number(0, ins->l.size);
+#if IDA_SDK_VERSION == 710
 		andIns->optimize_flat();
+#elif IDA_SDK_VERSION >= 720
+		andIns->optimize_solo();
+#endif
 		// msg("[I] pat_MulSub\n");
 		return 1;
 	}
@@ -208,7 +212,11 @@ struct ObfCompilerOptimizer : public optinsn_t
 		// Move the operands up to the top-level OR instruction
 		ins->l.swap(*xorOp1);
 		ins->r.swap(*xorOp2);
+#if IDA_SDK_VERSION == 710
 		ins->optimize_flat();
+#elif IDA_SDK_VERSION >= 720
+		ins->optimize_solo();
+#endif
 		// msg("[I] pat_OrViaXorAnd\n");
 		return 1;
 	}
@@ -240,7 +248,11 @@ struct ObfCompilerOptimizer : public optinsn_t
 		// 1, and then call optimize_flat to fold the constants.
 		ins->l.make_number(1, 1);
 		ins->r.make_number(1, 1);
+#if IDA_SDK_VERSION == 710
 		ins->optimize_flat();
+#elif IDA_SDK_VERSION >= 720
+		ins->optimize_solo();
+#endif
 		// msg("[I] pat_OrNegatedSameCondition\n");
 		return 1;
 	}
@@ -640,7 +652,11 @@ int ObfCompilerOptimizer::func(mblock_t *blk, minsn_t *ins)
 		mcode_t_to_string(ins, buf, sizeof(buf));
 		msg("ObfCompilerOptimizer: replaced by %s\n", buf);
 #endif
+#if IDA_SDK_VERSION == 710
 		ins->optimize_flat();
+#elif IDA_SDK_VERSION >= 720
+		ins->optimize_solo();
+#endif
 		// I got an INTERR if I optimized jcc conditionals without marking the lists dirty.
 		blk->mark_lists_dirty();
 		blk->mba->verify(true);

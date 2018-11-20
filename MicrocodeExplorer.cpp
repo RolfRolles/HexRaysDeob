@@ -192,7 +192,11 @@ public:
 		m_GVName.cat_sprnt("microins_%a_%s_%d_%d", mba->entry_ea, MicroMaturityToString(si->mat), nBlock, nSerial);
 		m_GV = create_graph_viewer(m_GVName.c_str(), id, migr_callback, this, 0, m_TW);
 		activate_widget(m_TW, true);
+#if IDA_SDK_VERSION == 710
+		display_widget(m_TW, WOPN_TAB | WOPN_MENU);
+#elif IDA_SDK_VERSION >= 720
 		display_widget(m_TW, WOPN_TAB);
+#endif
 		viewer_fit_window(m_GV);
 		return true;
 	}
@@ -274,7 +278,11 @@ public:
 		m_GVName.cat_sprnt("microblkgraph_%a_%s", mba->entry_ea, MicroMaturityToString(si->mat));
 		graph_viewer_t *gv = create_graph_viewer(m_GVName.c_str(), id, mgr_callback, this, 0, tw);
 		activate_widget(tw, true);
+#if IDA_SDK_VERSION == 710
 		display_widget(tw, WOPN_TAB | WOPN_MENU);
+#elif IDA_SDK_VERSION >= 720
+		display_widget(tw, WOPN_TAB);
+#endif
 		viewer_fit_window(gv);
 		return true;
 	}

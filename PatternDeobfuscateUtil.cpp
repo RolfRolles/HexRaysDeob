@@ -357,6 +357,10 @@ bool XorSimplifier::Simplify(minsn_t *insn)
 
 	// Trigger Hex-Rays' ordinary optimizations, which will remove the 
 	// XOR 0 terms. Return true.
+#if IDA_SDK_VERSION == 710
 	insn->optimize_flat();
+#elif IDA_SDK_VERSION >= 720
+	insn->optimize_solo();
+#endif
 	return true;
 }

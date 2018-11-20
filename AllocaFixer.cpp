@@ -41,15 +41,23 @@ struct AllocaFixer : minsn_visitor_t
 		}
 
 		// Sanity check that the microinstruction's argument list is not null
+#if IDA_SDK_VERSION == 710
 		mfuncinfo_t *func = curins->d.f;
-		if (func == NULL)
+#elif IDA_SDK_VERSION >= 720
+		mcallinfo_t *func = curins->d.f;
+#endif
+if (func == NULL)
 		{
 			msg("[E] %a: curins->d.f was NULL?", curins->ea);
 			return 0;
 		}
 
 		// Sanity check that the call to alloca passes one argument
+#if IDA_SDK_VERSION == 710
 		mfuncargs_t &args = func->args;
+#elif IDA_SDK_VERSION >= 720
+		mcallargs_t &args = func->args;
+#endif
 		if (args.size() != 1)
 		{
 			msg("[E] Call to alloca had %d arguments instead of 1?\n", args.size());

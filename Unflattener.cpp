@@ -469,7 +469,11 @@ int idaapi CFUnflattener::func(mblock_t *blk)
 	// stale. Mark them dirty, and perform local optimization for the lulz too.
 	if (bDirtyChains)
 	{
+#if IDA_SDK_VERSION == 710
 		mba->make_chains_dirty();
+#elif IDA_SDK_VERSION >= 720
+		mba->mark_chains_dirty();
+#endif
 		mba->optimize_local(0);
 	}
 
