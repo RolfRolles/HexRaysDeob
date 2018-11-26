@@ -17,6 +17,8 @@
 #include "Unflattener.hpp"
 #include "Config.hpp"
 
+extern plugin_t PLUGIN;
+
 // Hex-Rays API pointer
 hexdsp_t *hexdsp = NULL;
 
