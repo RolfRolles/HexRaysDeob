@@ -1,0 +1,69 @@
+# use this makefile to build HexRaysDeob for Linux
+# based off HexRaysCodeXplorer makefile for Linux
+#
+# Instructions:
+# After setting up IDA SDK and Hex Rays SDK to work, in the HexRaysDeob folder do:
+# 	IDA_DIR=<PATH_TO_IDA> IDA_SDK=<PATH_TO_IDA_SDK> make -f makefile.lnx
+
+CC=g++
+LD=ld
+LDFLAGS=-shared -m64 -static-libgcc -static-libstdc++
+
+LIBDIR=-L$(IDA_DIR)
+SRCDIR=./
+HEXRAYS_SDK=$(IDA_DIR)/plugins/hexrays_sdk
+INCLUDES=-I$(IDA_SDK)/include -I$(HEXRAYS_SDK)/include
+__X64__=1
+
+SRC=$(SRCDIR)AllocaFixer.cpp \
+	$(SRCDIR)CFFlattenInfo.cpp \
+	$(SRCDIR)DefUtil.cpp \
+	$(SRCDIR)HexRaysUtil.cpp \
+	$(SRCDIR)MicrocodeExplorer.cpp \
+	$(SRCDIR)PatternDeobfuscate.cpp \
+	$(SRCDIR)PatternDeobfuscateUtil.cpp \
+	$(SRCDIR)TargetUtil.cpp \
+	$(SRCDIR)Unflattener.cpp \
+	$(SRCDIR)main.cpp \
+
+OBJS=$(subst .cpp,.o,$(SRC))
+
+CFLAGS=-m64 -fPIC -D__LINUX__ -D__PLUGIN__ -std=c++14 -D__X64__ -D_GLIBCXX_USE_CXX11_ABI=0
+LIBS=-lc -lpthread -ldl
+
+ifeq ($(EA64),1)
+	CFLAGS+=-D__EA64__
+	LIBS+=-lida64
+	EXT=so
+	SUFFIX=64
+else
+	EXT=so
+	LIBS+=-lida
+	SUFFIX=
+endif
+
+all: check-env clean HexRaysDeob$(SUFFIX).$(EXT)
+
+HexRaysDeob$(SUFFIX).$(EXT): $(OBJS) 
+	$(CC) $(LDFLAGS) $(LIBDIR) -o HexRaysDeob$(SUFFIX).$(EXT) $(OBJS) $(LIBS)
+
+%.o: %.cpp
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+clean:
+	rm -f $(OBJS) HexRaysDeob$(SUFFIX).$(EXT)
+
+install:
+	cp -f HexRaysDeob$(SUFFIX).$(EXT) $(IDA_DIR)/plugins
+
+check-env:
+ifndef IDA_SDK
+	$(error IDA_SDK is undefined)
+endif
+ifndef IDA_DIR
+	$(error IDA_DIR is undefined)
+endif
+ifndef EA64
+	$(error specify EA64=0 for 32 bit build or EA64=1 for 64 bit build)
+endif
+.PHONY: check-env
