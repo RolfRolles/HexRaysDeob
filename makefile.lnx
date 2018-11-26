@@ -1,6 +1,9 @@
 # use this makefile to build HexRaysDeob for Linux
-# taken/based off HexRaysCodeXplorer makefile for Linux
-# IDA_DIR=<PATH_TO_IDA> IDA_SDK=<PATH_TO_IDA_SDK> make -f makefile.lnx
+# based off HexRaysCodeXplorer makefile for Linux
+#
+# Instructions:
+# After setting up IDA SDK and Hex Rays SDK to work, in the HexRaysDeob folder do:
+# 	IDA_DIR=<PATH_TO_IDA> IDA_SDK=<PATH_TO_IDA_SDK> make -f makefile.lnx
 
 CC=g++
 LD=ld
