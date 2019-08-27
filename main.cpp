@@ -75,7 +75,11 @@ bool idaapi run(size_t arg)
 		FixCallsToAllocaProbe();
 		return true;
 	}
+#if IDA_SDK_VERSION >= 730
+	if (arg == 0)
+#else
 	if (arg == 3)
+#endif
 	{
 		ShowMicrocodeExplorer();
 		return true;
