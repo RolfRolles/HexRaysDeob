@@ -194,8 +194,10 @@ public:
 		activate_widget(m_TW, true);
 #if IDA_SDK_VERSION == 710
 		display_widget(m_TW, WOPN_TAB | WOPN_MENU);
-#elif IDA_SDK_VERSION >= 720
+#elif IDA_SDK_VERSION == 720
 		display_widget(m_TW, WOPN_TAB);
+#elif IDA_SDK_VERSION >= 730
+		display_widget(m_TW, WOPN_DP_TAB);
 #endif
 		viewer_fit_window(m_GV);
 		return true;
@@ -280,8 +282,10 @@ public:
 		activate_widget(tw, true);
 #if IDA_SDK_VERSION == 710
 		display_widget(tw, WOPN_TAB | WOPN_MENU);
-#elif IDA_SDK_VERSION >= 720
+#elif IDA_SDK_VERSION == 720
 		display_widget(tw, WOPN_TAB);
+#elif IDA_SDK_VERSION >= 730
+		display_widget(tw, WOPN_DP_TAB);
 #endif
 		viewer_fit_window(gv);
 		return true;
@@ -523,6 +527,10 @@ void ShowMicrocodeExplorer()
 		NULL); // parent
 
 	hook_to_notification_point(HT_UI, ui_callback, si);
+#if IDA_SDK_VERSION >= 730
+	display_widget(si->cv, WOPN_DP_TAB | WOPN_RESTORE);
+#else
 	display_widget(si->cv, WOPN_TAB | WOPN_RESTORE);
+#endif
 }
 
