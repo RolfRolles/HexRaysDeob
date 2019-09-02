@@ -143,7 +143,7 @@ void mba_cpy(mbl_array_t *dst, mbl_array_t *src)
 	}
 }
 
-void RestoreMacroCompression_(mbl_array_t *mba, mbl_array_t *fchunk_mba, int &index)
+void RestoreMacroCompression(mbl_array_t *mba, mbl_array_t *fchunk_mba, int &index)
 {
 	mblock_t *block = mba->get_mblock(index);
 	minsn_t *insn = block->tail;
@@ -192,7 +192,6 @@ mbl_array_t *PreloadMacroCompression(const mba_ranges_t &mbr)
 		warning("#error \"%a: %s", hf.errea, hf.desc().c_str());
 		mba = info.first;
 	}
-
 	if (info.first != mba)
 	{
 		intptr_t mba_hash = get_mba_hash(mba);
@@ -214,7 +213,7 @@ mbl_array_t *PreloadMacroCompression(const mba_ranges_t &mbr)
 						{
 							mbl_array_t *fchunk_mba = PreloadMacroCompression(pfn);
 							if (fchunk_mba != NULL)
-								RestoreMacroCompression_(mba, fchunk_mba, i);
+								RestoreMacroCompression(mba, fchunk_mba, i);
 						}
 					}
 				}
@@ -224,7 +223,7 @@ mbl_array_t *PreloadMacroCompression(const mba_ranges_t &mbr)
 	return mba;
 }
 
-ssize_t idaapi RestoreMacroCompression(void * ud, hexrays_event_t event, va_list va)
+ssize_t idaapi hexrays_callback(void * ud, hexrays_event_t event, va_list va)
 {
 	if (event == hxe_microcode)
 	{
@@ -260,14 +259,14 @@ ssize_t idaapi ui_notification(void *user_data, int notification_code, va_list v
 
 void InitRestoreMacroCompression()
 {
-	install_hexrays_callback(&RestoreMacroCompression, NULL);
+	install_hexrays_callback(&hexrays_callback, NULL);
 	//register_and_attach_to_menu("Edit/Other/", "PreloadMacroCompression", "PreloadMacroCompression", NULL, SETMENU_INS, &pmc, &PLUGIN);
 	hook_to_notification_point(HT_UI, &ui_notification, NULL);
 }
 
 void UnInitRestoreMacroCompression()
 {
-	remove_hexrays_callback(&RestoreMacroCompression, NULL);
+	remove_hexrays_callback(&hexrays_callback, NULL);
 	//detach_action_from_menu("Edit/Other/", "PreloadMacroCompression");
 	//unregister_action("PreloadMacroCompression");
 	unhook_from_notification_point(HT_UI, &ui_notification, NULL);
