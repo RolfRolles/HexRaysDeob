@@ -15,6 +15,7 @@
 #include "PatternDeobfuscate.hpp"
 #include "AllocaFixer.hpp"
 #include "Unflattener.hpp"
+#include "RestoreMacroCompression.hpp"
 #include "Config.hpp"
 
 extern plugin_t PLUGIN;
@@ -38,6 +39,7 @@ int idaapi init(void)
 	install_optinsn_handler(&hook);
 	install_optblock_handler(&cfu);
 #endif
+	InitRestoreMacroCompression();
 	return PLUGIN_KEEP;
 }
 
@@ -58,6 +60,7 @@ void idaapi term(void)
 		// cleaning up before we unload solved the issues.
 		cfu.Clear(true);
 #endif
+		UnInitRestoreMacroCompression();
 		term_hexrays_plugin();
 	}
 }

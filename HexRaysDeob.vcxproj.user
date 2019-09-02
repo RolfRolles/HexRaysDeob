@@ -5,7 +5,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ida64 Debug|x64'">
-    <LocalDebuggerCommand>c:\Program Files\IDA 7.2\ida64.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>C:\IDA Pro 7.3\ida64.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

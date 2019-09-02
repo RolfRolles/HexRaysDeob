@@ -45,6 +45,9 @@
     <ClCompile Include="MicrocodeExplorer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RestoreMacroCompression.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HexRaysUtil.hpp">
@@ -75,6 +78,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MicrocodeExplorer.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RestoreMacroCompression.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

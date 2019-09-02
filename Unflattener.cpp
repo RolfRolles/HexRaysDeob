@@ -25,7 +25,7 @@ static int debugmsg(const char *fmt, ...)
 
 void DumpMBAToFile(mbl_array_t *mba, const char *fpath)
 {
-	FILE *fp = qfopen(fpath, "w");
+	FILE *fp = qfopen(fpath, "wb");
 	file_printer_t fpt(fp);
 	mba->print(fpt);
 	qfclose(fp);

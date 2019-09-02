@@ -179,6 +179,7 @@
     <ClCompile Include="MicrocodeExplorer.cpp" />
     <ClCompile Include="PatternDeobfuscate.cpp" />
     <ClCompile Include="PatternDeobfuscateUtil.cpp" />
+    <ClCompile Include="RestoreMacroCompression.cpp" />
     <ClCompile Include="TargetUtil.cpp" />
     <ClCompile Include="Unflattener.cpp" />
   </ItemGroup>
@@ -191,6 +192,7 @@
     <ClInclude Include="MicrocodeExplorer.hpp" />
     <ClInclude Include="PatternDeobfuscate.hpp" />
     <ClInclude Include="PatternDeobfuscateUtil.hpp" />
+    <ClInclude Include="RestoreMacroCompression.hpp" />
     <ClInclude Include="TargetUtil.hpp" />
     <ClInclude Include="Unflattener.hpp" />
   </ItemGroup>
