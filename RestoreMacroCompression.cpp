@@ -3,8 +3,21 @@
 #include <map>
 #include <vector>
 
+#define FCHUNK_MAXSIZE 0x50
+
+enum asm_type
+{
+	at_unknown,
+	at_x86,
+	at_x64,
+	at_arm,
+	at_arm64
+};
+
 extern hexdsp_t *hexdsp;
+asm_type cur_asm_type;
 std::map<ea_t, std::pair<mbl_array_t *, intptr_t>> microcode_cache;
+bool is_preload = false;
 
 intptr_t right_shift_loop(intptr_t num, intptr_t n)
 {
@@ -22,56 +35,6 @@ bool is_sub(ea_t ea)
 		return ea == n;
 	}
 	return false;
-}
-
-bool is_embed(mbl_array_t *mba)
-{
-	int ret_count = 0;
-	for (int i = 0; i < mba->qty; i++)
-	{
-		mblock_t *block = mba->get_mblock(i);
-		minsn_t *insn = block->head;
-		while (insn != NULL)
-		{
-			if (insn->opcode == m_ret)
-			{
-				ret_count++;
-				if (ret_count > 1)
-					return false;
-			}
-			insn = insn->next;
-		}
-	}
-	return true;
-}
-
-void get_all_minsn(mbl_array_t *mba, std::vector<std::vector<minsn_t>> &result)
-{
-	for (int i = 0; i < mba->qty; i++)
-	{
-		std::vector<minsn_t> list;
-		mblock_t *block = mba->get_mblock(i);
-		minsn_t *insn = block->head;
-		while (insn != NULL)
-		{
-			list.push_back(*insn);
-			insn = insn->next;
-		}
-		if (list.size())
-			result.push_back(list);
-	}
-	if (result.size())
-	{
-		std::vector<minsn_t> &list = result[result.size() - 1];
-		minsn_t &last = list[list.size() - 1];
-		if (last.opcode == m_ret)
-			list.pop_back();
-		else if (last.opcode == m_goto)
-		{
-			last.opcode = m_call;
-			//get_func;
-		}
-	}
 }
 
 intptr_t get_mop_hash(mop_t *mop)
@@ -111,12 +74,40 @@ intptr_t get_mba_hash(mbl_array_t *mba)
 	return hash;
 }
 
+void blk_cpy(mblock_t *dst, mblock_t *src, ea_t ea = BADADDR)
+{
+	dst->flags = src->flags;
+	dst->start = src->start;
+	dst->end = src->end;
+	dst->type = src->type;
+	dst->dead_at_start = src->dead_at_start;
+	dst->mustbuse = src->mustbuse;
+	dst->maybuse = src->maybuse;
+	dst->mustbdef = src->mustbdef;
+	dst->maybdef = src->maybdef;
+	dst->dnu = src->dnu;
+	dst->maxbsp = src->maxbsp;
+	dst->minbstkref = src->minbstkref;
+	dst->minbargref = src->minbargref;
+	dst->predset = src->predset;
+	dst->succset = src->succset;
+	minsn_t *src_insn = src->head;
+	minsn_t *dst_insn = NULL;
+	while (src_insn != NULL)
+	{
+		minsn_t *new_insn = new minsn_t(*src_insn);
+		new_insn->ea = ea == BADADDR ? src_insn->ea : ea;
+		dst_insn = dst->insert_into_block(new_insn, dst_insn);
+		src_insn = src_insn->next;
+	}
+}
+
 bool mba_cmp(mbl_array_t *mba1, mbl_array_t *mba2)
 {
 	return mba1 == mba2 || get_mba_hash(mba1) == get_mba_hash(mba2);
 }
 
-void mba_cpy(mbl_array_t *dst, mbl_array_t *src)
+void mba_cpy(mbl_array_t *dst, mbl_array_t *src, ea_t ea = BADADDR)
 {
 	for (int i = dst->qty - 1; i >= 0; i--)
 	{
@@ -125,20 +116,84 @@ void mba_cpy(mbl_array_t *dst, mbl_array_t *src)
 	}
 	for (int i = 0; i < src->qty; i++)
 	{
-		mblock_t *src_block = src->get_mblock(i);
 		mblock_t *dst_block = dst->insert_block(i);
-		dst_block->flags = src_block->flags;
-		dst_block->start = src_block->start;
-		dst_block->end = src_block->end;
-		dst_block->type = src_block->type;
-		minsn_t *src_insn = src_block->head;
-		minsn_t *dst_insn = NULL;
-		while (src_insn != NULL)
+		dst_block->flags |= MBL_FAKE;
+	}
+	for (int i = 0; i < src->qty; i++)
+	{
+		mblock_t *src_block = src->get_mblock(i);
+		mblock_t *dst_block = dst->get_mblock(i);
+		blk_cpy(dst_block, src_block, ea);
+	}
+}
+
+mop_t get_mop(const char *reg_name, int s)
+{
+	size_t len = strlen(reg_name) + 10;
+	char reg_full_name[24];
+	sprintf_s(reg_full_name, "%s.%d", reg_name, s);
+	mop_t mop(0, s);
+	try
+	{
+		while (true)
 		{
-			minsn_t *new_insn = new minsn_t(*src_insn);
-			new_insn->ea = src_insn->ea;
-			dst_insn = dst_block->insert_into_block(new_insn, dst_insn);
-			src_insn = src_insn->next;
+			if (strcmp(mop.dstr(), reg_full_name) == 0)
+				break;
+			mop.r++;
+		}
+	}
+	catch (const std::exception&)
+	{
+		mop.zero();
+	}
+	return mop;
+}
+
+mbl_array_t *PreloadMacroCompression(const mba_ranges_t &mbr);
+
+void FixSP(mblock_t *block, ea_t ea, bool sub = false, minsn_t *position = NULL)
+{
+	minsn_t *insn = new minsn_t(ea);
+	insn->opcode = sub ? m_sub : m_add;
+	switch (cur_asm_type)
+	{
+	case at_unknown:
+		insn->_make_nop();
+		return;
+	case at_x86:
+		insn->l = insn->d = get_mop("esp", 4);
+		insn->r.make_number(4, 4, ea);
+		break;
+	case at_x64:
+		insn->l = insn->d = get_mop("rsp", 8);
+		insn->r.make_number(8, 8, ea);
+		break;
+	case at_arm:
+		insn->l = insn->d = get_mop("sp", 4);
+		insn->r.make_number(4, 4, ea);
+		break;
+	case at_arm64:
+		insn->l = insn->d = get_mop("sp", 8);
+		insn->r.make_number(8, 8, ea);
+		break;
+	default:
+		break;
+	}
+	block->insert_into_block(insn, position);
+}
+
+void FixBlockSerial(mblock_t *begin_block, mblock_t *end_block, std::map<int, int> &serial_map)
+{
+	for (mblock_t *block = begin_block; block != end_block; block = block->nextb)
+	{
+		for (minsn_t *insn = block->head; insn != NULL; insn = insn->next)
+		{
+			if (insn->l.t == mop_b)
+				insn->l.b = serial_map[insn->l.b];
+			if (insn->r.t == mop_b)
+				insn->r.b = serial_map[insn->r.b];
+			if (insn->d.t == mop_b)
+				insn->d.b = serial_map[insn->d.b];
 		}
 	}
 }
@@ -147,38 +202,40 @@ void RestoreMacroCompression(mbl_array_t *mba, mbl_array_t *fchunk_mba, int &ind
 {
 	mblock_t *block = mba->get_mblock(index);
 	minsn_t *insn = block->tail;
-	insn->_make_nop();
 	ea_t cur_ea = insn->ea;
+	insn->_make_nop();
 	mblock_t *new_block = NULL;
+	std::map<int, int> serial_map;
 	for (int i = 0; i < fchunk_mba->qty; i++)
 	{
 		mblock_t *fchunk_block = fchunk_mba->get_mblock(i);
-		minsn_t *fchunk_insn = fchunk_block->head;
-		if (fchunk_insn != NULL)
+		if (fchunk_block->head != NULL)
 		{
 			new_block = mba->insert_block(++index);
-			new_block->flags = block->flags;
+			serial_map[fchunk_block->serial] = new_block->serial;
+			blk_cpy(new_block, fchunk_block, cur_ea);
 			new_block->start = cur_ea;
 			new_block->end = block->end;
-			minsn_t *pre_insn = NULL;
-			while (fchunk_insn != NULL)
-			{
-				minsn_t *new_insn = new minsn_t(*fchunk_insn);
-				new_insn->ea = cur_ea;
-				pre_insn = new_block->insert_into_block(new_insn, pre_insn);
-				fchunk_insn = fchunk_insn->next;
-			}
 		}
 	}
 	if (new_block != NULL)
 	{
+		FixBlockSerial(block->nextb, new_block->nextb, serial_map);
 		minsn_t *last_insn = new_block->tail;
 		if (last_insn->opcode == m_ret)
 			last_insn->_make_nop();
 		else if (last_insn->opcode == m_goto)
 		{
-			last_insn->opcode = m_call;
+			ea_t address = last_insn->l.g;
+			func_t *pfn;
+			mbl_array_t *fchunk_mba;
+			if (is_sub(address) && (pfn = get_fchunk(address)) != NULL && pfn->size() <= FCHUNK_MAXSIZE && (fchunk_mba = PreloadMacroCompression(pfn)) != NULL)
+				RestoreMacroCompression(mba, fchunk_mba, index);
+			else
+				last_insn->opcode = m_call;
 		}
+		FixSP(block->nextb, cur_ea, true);
+		FixSP(new_block, cur_ea, false, new_block->tail);
 	}
 }
 
@@ -205,11 +262,11 @@ mbl_array_t *PreloadMacroCompression(const mba_ranges_t &mbr)
 				minsn_t *insn = block->tail;
 				if (insn != NULL && is_mcode_call(insn->opcode))
 				{
-					ea_t address = (ea_t)(insn->l.nnn);
+					ea_t address = insn->l.g;
 					if (is_sub(address))
 					{
 						func_t *pfn = get_fchunk(address);
-						if (pfn != NULL && pfn->size() <= 0x50)
+						if (pfn != NULL && pfn->size() <= FCHUNK_MAXSIZE)
 						{
 							mbl_array_t *fchunk_mba = PreloadMacroCompression(pfn);
 							if (fchunk_mba != NULL)
@@ -219,16 +276,17 @@ mbl_array_t *PreloadMacroCompression(const mba_ranges_t &mbr)
 				}
 			}
 		}
+		else
+			mba = info.first;
 	}
 	return mba;
 }
 
-ssize_t idaapi hexrays_callback(void * ud, hexrays_event_t event, va_list va)
+ssize_t idaapi hexrays_callback(void *ud, hexrays_event_t event, va_list va)
 {
-	if (event == hxe_microcode)
+	if (is_preload == false && event == hxe_microcode)
 	{
 		mbl_array_t *mba = va_arg(va, mbl_array_t *);
-		msg("hxe_microcode: %a", mba);
 		auto it = microcode_cache.find(mba->entry_ea);
 		if (it != microcode_cache.end())
 		{
@@ -249,8 +307,9 @@ ssize_t idaapi ui_notification(void *user_data, int notification_code, va_list v
 			func_t *pfn = get_func(get_screen_ea());
 			if (pfn != NULL)
 			{
+				is_preload = true;
 				PreloadMacroCompression(pfn);
-				msg("PreloadMacroCompression End");
+				is_preload = false;
 			}
 		}
 	}
@@ -259,16 +318,19 @@ ssize_t idaapi ui_notification(void *user_data, int notification_code, va_list v
 
 void InitRestoreMacroCompression()
 {
+	if (strcmp(inf.procname, "ARM") == 0 || strcmp(inf.procname, "ARMB") == 0) //arm
+		cur_asm_type = inf_is_64bit() ? at_arm64 : at_arm;
+	else if (memcmp(inf.procname, "80386", 5) == 0 || memcmp(inf.procname, "80486", 5) == 0 || memcmp(inf.procname, "80586", 5) == 0 || memcmp(inf.procname, "80686", 5) == 0 || strcmp(inf.procname, "metapc") == 0 || strcmp(inf.procname, "p2") == 0 || strcmp(inf.procname, "p3") == 0 || strcmp(inf.procname, "p4") == 0)
+		cur_asm_type = inf_is_64bit() ? at_x64 : at_x86;
+	else
+		cur_asm_type = at_unknown;
 	install_hexrays_callback(&hexrays_callback, NULL);
-	//register_and_attach_to_menu("Edit/Other/", "PreloadMacroCompression", "PreloadMacroCompression", NULL, SETMENU_INS, &pmc, &PLUGIN);
 	hook_to_notification_point(HT_UI, &ui_notification, NULL);
 }
 
 void UnInitRestoreMacroCompression()
 {
 	remove_hexrays_callback(&hexrays_callback, NULL);
-	//detach_action_from_menu("Edit/Other/", "PreloadMacroCompression");
-	//unregister_action("PreloadMacroCompression");
 	unhook_from_notification_point(HT_UI, &ui_notification, NULL);
 	microcode_cache.clear();
 }

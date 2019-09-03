@@ -103,6 +103,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ida64 Debug|x64'">
     <IncludePath>C:\IDA Pro 7.3\plugins\hexrays_sdk\include;C:\IDA Pro 7.3 SDK\idasdk73\include;$(IncludePath)</IncludePath>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ida32 Debug|Win32'">
     <ClCompile>
