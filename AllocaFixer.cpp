@@ -18,7 +18,6 @@
 #include <hexrays.hpp>
 #include "HexRaysUtil.hpp"
 #include <frame.hpp>
-#include "Config.hpp"
 
 // Finds calls to alloca in a function's decompilation microcode, and
 // records the integer parameter from each call site.
@@ -46,7 +45,7 @@ struct AllocaFixer : minsn_visitor_t
 #elif IDA_SDK_VERSION >= 720
 		mcallinfo_t *func = curins->d.f;
 #endif
-if (func == NULL)
+if (func == nullptr)
 		{
 			msg("[E] %a: curins->d.f was NULL?", curins->ea);
 			return 0;
@@ -102,7 +101,7 @@ void FixCallsToAllocaProbe()
 			continue;
 
 		func_t *f = get_func(xr.from);
-		if (f == NULL)
+		if (f == nullptr)
 		{
 			msg("[E] Call to alloca from %a is not within a function; will not be processed\n", xr.from);
 			continue;
@@ -120,7 +119,7 @@ void FixCallsToAllocaProbe()
 		mba_ranges_t mbr(f);
 		hexrays_failure_t hf;
 		mbl_array_t *mba = gen_microcode(mbr, &hf);
-		if (mba == NULL)
+		if (mba == nullptr)
 		{
 			msg("[E] FixCallsToAllocaProbe(%a): decompilation failed (%s)\n", f->start_ea, hf.desc().c_str());
 			continue;

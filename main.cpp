@@ -10,7 +10,6 @@
 #include <set>
 #define USE_DANGEROUS_FUNCTIONS 
 #include <hexrays.hpp>
-#include "HexRaysUtil.hpp"
 #include "MicrocodeExplorer.hpp"
 #include "PatternDeobfuscate.hpp"
 #include "AllocaFixer.hpp"
@@ -20,13 +19,18 @@
 extern plugin_t PLUGIN;
 
 // Hex-Rays API pointer
-hexdsp_t *hexdsp = NULL;
+hexdsp_t *hexdsp = nullptr;
 
 ObfCompilerOptimizer hook;
 CFUnflattener cfu;
 
 //--------------------------------------------------------------------------
+
+#if IDA_SDK_VERSION <= 730
 int idaapi init(void)
+#else
+plugmod_t* idaapi init()  ///< Initialize plugin - returns a pointer to plugmod_t
+#endif
 {
 	if (!init_hexrays_plugin())
 		return PLUGIN_SKIP; // no decompiler
@@ -44,7 +48,7 @@ int idaapi init(void)
 //--------------------------------------------------------------------------
 void idaapi term(void)
 {
-	if (hexdsp != NULL)
+	if (hexdsp != nullptr)
 	{
 
 		// Uninstall our block and instruction optimization classes.

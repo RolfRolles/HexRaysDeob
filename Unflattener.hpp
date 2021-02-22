@@ -1,10 +1,9 @@
 #pragma once
-#include <map>
 #include <hexrays.hpp>
 #include "CFFlattenInfo.hpp"
 #include "DefUtil.hpp"
 
-struct CFUnflattener : public optblock_t
+struct CFUnflattener : optblock_t
 {
 	CFFlattenInfo cfi;
 	MovChain m_DeferredErasuresLocal;

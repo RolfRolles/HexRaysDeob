@@ -54,7 +54,7 @@ void ChangeSingleTarget(mblock_t *blk, int iOldTarget, int iNewTarget)
 // this block end in a call instruction?
 bool is_call_block(mblock_t *blk)
 {
-	if (blk->tail == NULL)
+	if (blk->tail == nullptr)
 		return false;
 
 	return blk->tail->opcode == m_call || blk->tail->opcode == m_icall;
@@ -86,7 +86,7 @@ int RemoveSingleGotos(mbl_array_t *mba)
 		minsn_t *m2 = getf_reginsn(b->head);
 		
 		// Is the first non-assert instruction a goto?
-		if (m2 == NULL || m2->opcode != m_goto)
+		if (m2 == nullptr || m2->opcode != m_goto)
 			continue; 
 		
 		// If it was a goto, record the destination block number
@@ -107,7 +107,7 @@ int RemoveSingleGotos(mbl_array_t *mba)
 
 		// Get the last instruction on the block
 		minsn_t *mgoto = blk->tail;
-		if (mgoto == NULL)
+		if (mgoto == nullptr)
 			continue;
 
 		int iOriginalGotoTarget;
@@ -216,9 +216,9 @@ bool ExtractJccParts(mblock_t *pred1, mblock_t *&endsWithJcc, int &jccDest, int 
 // that doesn't. Also return the integer numbers of those blocks.
 bool SplitMblocksByJccEnding(mblock_t *pred1, mblock_t *pred2, mblock_t *&endsWithJcc, mblock_t *&nonJcc, int &jccDest, int &jccFallthrough)
 {
-	endsWithJcc = NULL;
-	nonJcc = NULL;
-	if (pred1->tail == NULL || pred2->tail == NULL)
+	endsWithJcc = nullptr;
+	nonJcc      = nullptr;
+	if (pred1->tail == nullptr || pred2->tail == nullptr)
 		return false;
 
 	// Check if the first block ends with jcc. Make sure the second one 
@@ -348,8 +348,8 @@ void DeleteBlock(mblock_t *mb)
 		mb->succset.del(mb->succ(0));
 
 	// Delete the instructions on the block
-	minsn_t *pCurr = mb->head, *pNext = NULL;
-	while (pCurr != NULL)
+	minsn_t *pCurr = mb->head, *pNext = nullptr;
+	while (pCurr != nullptr)
 	{
 		pNext = pCurr->next;
 		delete pCurr;
@@ -357,8 +357,8 @@ void DeleteBlock(mblock_t *mb)
 	}
 	
 	// Mark that the block now has no instructions.
-	mb->head = NULL;
-	mb->tail = NULL;
+	mb->head = nullptr;
+	mb->tail = nullptr;
 }
 
 // The goto-to-goto elimination and unflattening phases remove edges in the

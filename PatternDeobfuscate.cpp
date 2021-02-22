@@ -6,7 +6,7 @@
 // Our pattern-based deobfuscation is implemented as an optinsn_t structure,
 // which allows us to hook directly into the microcode generation phase and
 // perform optimizations automatically, whenever code is decompiled.
-struct ObfCompilerOptimizer : public optinsn_t
+struct ObfCompilerOptimizer : optinsn_t
 {
 	// This function simplifies microinstruction patterns that look like
 	// either: (x & 1) | (y & 1) ==> (x | y) & 1
@@ -76,7 +76,7 @@ struct ObfCompilerOptimizer : public optinsn_t
 			return false;
 
 		// Extract x and (y-z)
-		mop_t *opAddNum = NULL, *opAddNonNum = NULL;
+		mop_t *opAddNum = nullptr, *opAddNonNum = nullptr;
 		if (!ExtractNumAndNonNum(ins, opAddNum, opAddNonNum))
 			return false;
 
@@ -87,7 +87,7 @@ struct ObfCompilerOptimizer : public optinsn_t
 		// Extract y and z. I guess technically I shouldn't use 
 		// ExtractNumAndNonNum here since subtraction isn't commutative...
 		// Call that a bug, but it didn't matter in practice.
-		mop_t *opSubNum = NULL, *opSubNonNum = NULL;
+		mop_t *opSubNum = nullptr, *opSubNonNum = nullptr;
 		if (!ExtractNumAndNonNum(opAddNonNum->d, opSubNum, opSubNonNum))
 			return false;
 
@@ -277,10 +277,10 @@ struct ObfCompilerOptimizer : public optinsn_t
 			return 0;
 
 		// Extract the numeric and non-numeric operands from both AND terms
-		mop_t *lhsNum = NULL, *rhsNum = NULL;
-		mop_t *lhsNonNum = NULL, *rhsNonNum = NULL;
-		bool bLhsSucc = ExtractNumAndNonNum(lhs1, lhsNum, lhsNonNum);
-		bool bRhsSucc = ExtractNumAndNonNum(rhs1, rhsNum, rhsNonNum);
+		mop_t *lhsNum    = nullptr, *rhsNum    = nullptr;
+		mop_t *lhsNonNum = nullptr, *rhsNonNum = nullptr;
+		bool bLhsSucc    = ExtractNumAndNonNum(lhs1, lhsNum, lhsNonNum);
+		bool bRhsSucc    = ExtractNumAndNonNum(rhs1, rhsNum, rhsNonNum);
 
 		// ... both AND terms must have one constant ...
 		if (!bLhsSucc || !bRhsSucc)
@@ -295,8 +295,8 @@ struct ObfCompilerOptimizer : public optinsn_t
 			return 0;
 
 		// One of the non-numeric parts must have a binary not (i.e., ~) on it
-		minsn_t *sourceOfResult = NULL;
-		mop_t *nonNottedInsn = NULL, *nottedNum = NULL, *nottedInsn = NULL;
+		minsn_t *sourceOfResult = nullptr;
+		mop_t *nonNottedInsn    = nullptr, *nottedNum = nullptr, *nottedInsn = nullptr;
 
 		// Check the left-hand size for binary not
 		if (lhsNonNum->t == mop_d && lhsNonNum->d->opcode == m_bnot)
@@ -313,7 +313,7 @@ struct ObfCompilerOptimizer : public optinsn_t
 		if (rhsNonNum->t == mop_d && rhsNonNum->d->opcode == m_bnot)
 		{
 			// Both sides NOT? Not what we want, return 0
-			if (nottedInsn != NULL)
+			if (nottedInsn != nullptr)
 				return 0;
 
 			// Extract the NOTed term
@@ -324,7 +324,7 @@ struct ObfCompilerOptimizer : public optinsn_t
 		else
 		{
 			// Neither side has a NOT? Bail
-			if (nonNottedInsn != NULL)
+			if (nonNottedInsn != nullptr)
 				return 0;
 			nonNottedInsn = rhsNonNum;
 		}
@@ -398,7 +398,7 @@ struct ObfCompilerOptimizer : public optinsn_t
 	// Find and return it if that's the case.
 	mop_t *FindNonCommonConstant(std::set<mop_t *> *smaller, std::set<mop_t *> *bigger)
 	{
-		mop_t *noMatch = NULL;
+		mop_t *noMatch = nullptr;
 		// Iterate through the larger set
 		for (auto eL : *bigger)
 		{
@@ -419,8 +419,8 @@ struct ObfCompilerOptimizer : public optinsn_t
 				// If noMatch was not NULL, then there was more than one 
 				// constant in the larger set that wasn't in the smaller one,
 				// so return NULL on failure.
-				if (noMatch != NULL)
-					return 0;
+				if (noMatch != nullptr)
+					return nullptr;
 
 				noMatch = eL;
 			}
@@ -482,7 +482,7 @@ struct ObfCompilerOptimizer : public optinsn_t
 		mop_t *noMatch = FindNonCommonConstant(smaller, bigger);
 		
 		// If there wasn't one, the pattern failed, so return 0
-		if (noMatch == NULL)
+		if (noMatch == nullptr)
 			return 0;
 
 		// Invert the non-common number and truncate it down to its proper size
@@ -503,7 +503,7 @@ struct ObfCompilerOptimizer : public optinsn_t
 	{
 		// The whole expression must be logically negated.
 		minsn_t *inner;
-		if (!ExtractLogicallyNegatedTerm(ins, inner) || inner == NULL)
+		if (!ExtractLogicallyNegatedTerm(ins, inner) || inner == nullptr)
 			return 0;
 
 		// The thing that was negated must be an OR with compound operands.
@@ -599,11 +599,20 @@ struct ObfCompilerOptimizer : public optinsn_t
 
 	// This is the virtual function dictated by the optinsn_t interface. This
 	// function gets called by the Hex-Rays kernel; we optimize the microcode.
+#if IDA_SDK_VERSION <= 730
 	int func(mblock_t *blk, minsn_t *ins);
+#else
+    int func(mblock_t* blk, minsn_t* ins, int optflags) override;
+#endif
 };
 
 // Callback function. Do pattern-deobfuscation.
+#if IDA_SDK_VERSION <= 730
 int ObfCompilerOptimizer::func(mblock_t *blk, minsn_t *ins)
+#else
+int ObfCompilerOptimizer::func(mblock_t* blk, minsn_t* ins, int optflags)
+#endif
+
 {
 #if OPTVERBOSE
 	char buf[1000];

@@ -3,7 +3,6 @@
 
 #define USE_DANGEROUS_FUNCTIONS
 #include <hexrays.hpp>
-#include "HexRaysUtil.hpp"
 #include "Unflattener.hpp"
 #include "CFFlattenInfo.hpp"
 #include "TargetUtil.hpp"
@@ -39,7 +38,7 @@ int atThisMaturity = 0;
 // the control flow flattening switch.
 mblock_t *CFUnflattener::GetDominatedClusterHead(mbl_array_t *mba, int iDispPred, int &iClusterHead)
 {
-	mblock_t *mbClusterHead = NULL;
+	mblock_t *mbClusterHead = nullptr;
 	// Find the block that is targeted by the dispatcher, and that 
 	// dominates the block we're currently looking at. This logic won't
 	// work for the first block (since it wasn't targeted by the control 
@@ -55,7 +54,7 @@ mblock_t *CFUnflattener::GetDominatedClusterHead(mbl_array_t *mba, int iDispPred
 		if (iClusterHead < 0)
 		{
 			debugmsg("[I] Block %d was not part of a dominated cluster\n", iDispPred);
-			return NULL;
+			return nullptr;
 		}
 		mbClusterHead = mba->get_mblock(iClusterHead);
 #if UNFLATTENVERBOSE
@@ -86,7 +85,7 @@ int CFUnflattener::FindBlockTargetOrLastCopy(mblock_t *mb, mblock_t *mbClusterHe
 
 	MovChain local;
 
-	mop_t *opNum = NULL, *opCopy;
+	mop_t *opNum = nullptr, *opCopy;
 	// Search backwards looking for a numeric assignment to "what". We may or 
 	// may not find a numeric assignment, but we might find intervening 
 	// assignments where "what" is copied from other variables.
@@ -111,7 +110,7 @@ int CFUnflattener::FindBlockTargetOrLastCopy(mblock_t *mb, mblock_t *mbClusterHe
 	// of the cluster. If we don't find it, this is not necessarily an 
 	// indication that the analysis failed; for blocks with two successors,
 	// we do further analysis.
-	if (!bFound && opCopy != NULL && opCopy->t == mop_S)
+	if (!bFound && opCopy != nullptr && opCopy->t == mop_S)
 	{
 		mop_t *num = FindForwardStackVarDef(mbClusterHead, opCopy, local);
 		if (num)
@@ -163,9 +162,9 @@ bool CFUnflattener::HandleTwoPreds(mblock_t *mb, mblock_t *mbClusterHead, mop_t 
 	mblock_t *pred1 = mba->get_mblock(mb->pred(0));
 	mblock_t *pred2 = mba->get_mblock(mb->pred(1));
 
-	mblock_t *endsWithJcc = NULL;
-	nonJcc = NULL;
-	int jccDest = -1, jccFallthrough = -1;
+	mblock_t *endsWithJcc = nullptr;
+	nonJcc                = nullptr;
+	int jccDest           = -1, jccFallthrough = -1;
 
 	// Given the two predecessors, find the block with the conditional jump at
 	// the end of it (store the block in "endsWithJcc") and the one without
@@ -336,7 +335,7 @@ int idaapi CFUnflattener::func(mblock_t *blk)
 		// definitions.
 		int iClusterHead;
 		mblock_t *mbClusterHead = GetDominatedClusterHead(mba, iDispPred, iClusterHead);
-		if (mbClusterHead == NULL)
+		if (mbClusterHead == nullptr)
 			continue;
 
 		// It's best to process erasures for every block we unflatten 
@@ -432,7 +431,7 @@ int idaapi CFUnflattener::func(mblock_t *blk)
 				debugmsg("[I] %d: tail is %s\n", nonJcc->serial, buf);
 #endif
 
-			} while (mbCurr != NULL);
+			} while (mbCurr != nullptr);
 
 			
 			// Make a note to ourselves to modify the graph structure later,
