@@ -44,13 +44,13 @@ bool InsertOp(mblock_t *mb, mlist_t &ml, mop_t *op)
 minsn_t *my_find_def_backwards(mblock_t *mb, mlist_t &ml, minsn_t *start)
 {
 	minsn_t *mend = mb->head;
-	for (minsn_t *p = start != NULL ? start : mb->tail; p != NULL; p = p->prev)
+	for (minsn_t *p = start != nullptr ? start : mb->tail; p != nullptr; p = p->prev)
 	{
 		mlist_t def = mb->build_def_list(*p, MAY_ACCESS | FULL_XDSU);
 		if (def.includes(ml))
 			return p;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // This is a nearly identical version of the function above, except it works
@@ -58,13 +58,13 @@ minsn_t *my_find_def_backwards(mblock_t *mb, mlist_t &ml, minsn_t *start)
 minsn_t *my_find_def_forwards(mblock_t *mb, mlist_t &ml, minsn_t *start)
 {
 	minsn_t *mend = mb->head;
-	for (minsn_t *p = start != NULL ? start : mb->head; p != NULL; p = p->next)
+	for (minsn_t *p = start != nullptr ? start : mb->head; p != nullptr; p = p->next)
 	{
 		mlist_t def = mb->build_def_list(*p, MAY_ACCESS | FULL_XDSU);
 		if (def.includes(ml))
 			return p;
 	}
-	return NULL;
+	return nullptr;
 
 }
 
@@ -93,7 +93,7 @@ bool FindNumericDefBackwards(mblock_t *blk, mop_t *op, mop_t *&opNum, MovChain &
 
 	// Start from the end of the block. This variable gets updated when a copy
 	// is encountered, so that subsequent searches start from the right place.
-	minsn_t *mStart = NULL;
+	minsn_t *mStart = nullptr;
 	do
 	{
 		// Told you this function was just a wrapper around 
@@ -101,7 +101,7 @@ bool FindNumericDefBackwards(mblock_t *blk, mop_t *op, mop_t *&opNum, MovChain &
 		minsn_t *mDef = my_find_def_backwards(blk, ml, mStart);
 
 		// If we did find a definition...
-		if (mDef != NULL)
+		if (mDef != nullptr)
 		{
 			// Ensure that it's a mov instruction. We don't want, for example,
 			// an "stx" instruction, which is assumed to redefine everything
@@ -174,7 +174,7 @@ bool FindNumericDefBackwards(mblock_t *blk, mop_t *op, mop_t *&opNum, MovChain &
 				return false;
 			
 			// Resume the search at the end of the new block.
-			mStart = NULL;
+			mStart = nullptr;
 		}
 	} while (true);
 	return false;
@@ -186,11 +186,11 @@ mop_t *FindForwardNumericDef(mblock_t *blk, mop_t *mop, minsn_t *&assign_insn)
 {
 	mlist_t ml;
 	if (!InsertOp(blk, ml, mop))
-		return NULL;
+		return nullptr;
 
 	// Find a forward definition
-	assign_insn = my_find_def_forwards(blk, ml, NULL);
-	if (assign_insn != NULL)
+	assign_insn = my_find_def_forwards(blk, ml, nullptr);
+	if (assign_insn != nullptr)
 	{
 
 #if UNFLATTENVERBOSE
@@ -202,12 +202,12 @@ mop_t *FindForwardNumericDef(mblock_t *blk, mop_t *mop, minsn_t *&assign_insn)
 		
 		// We only want MOV instructions with numeric left-hand sides
 		if (assign_insn->opcode != m_mov || assign_insn->l.t != mop_n)
-			return NULL;
+			return nullptr;
 		
 		// Return the numeric operand if we found it
 		return &assign_insn->l;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // This function is just a thin wrapper around FindForwardNumericDef, which 
@@ -215,15 +215,15 @@ mop_t *FindForwardNumericDef(mblock_t *blk, mop_t *mop, minsn_t *&assign_insn)
 mop_t *FindForwardStackVarDef(mblock_t *mbClusterHead, mop_t *opCopy, MovChain &chain)
 {
 	// Must be a non-NULL stack variable
-	if (opCopy == NULL || opCopy->t != mop_S)
-		return NULL;
+	if (opCopy == nullptr || opCopy->t != mop_S)
+		return nullptr;
 
 	minsn_t *ins;
 		
 	// Find the definition
 	mop_t *num = FindForwardNumericDef(mbClusterHead, opCopy, ins);
-	if (num == NULL)
-		return NULL;
+	if (num == nullptr)
+		return nullptr;
 
 #if UNFLATTENVERBOSE
 		qstring qs;

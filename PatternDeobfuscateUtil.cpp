@@ -11,7 +11,7 @@
 // deobfuscations.
 bool ExtractNumAndNonNum(minsn_t *insn, mop_t *&numOp, mop_t *&otherOp)
 {
-	mop_t *num = NULL, *other = NULL;
+	mop_t *num = nullptr, *other = nullptr;
 
 	if (insn->l.t == mop_n)
 	{
@@ -21,7 +21,7 @@ bool ExtractNumAndNonNum(minsn_t *insn, mop_t *&numOp, mop_t *&otherOp)
 
 	if (insn->r.t == mop_n)
 	{
-		if (num != NULL)
+		if (num != nullptr)
 		{
 			// Technically we have an option to perform constant folding 
 			// here... but Hex-Rays should have done / should do that for us
@@ -30,7 +30,7 @@ bool ExtractNumAndNonNum(minsn_t *insn, mop_t *&numOp, mop_t *&otherOp)
 		num = &insn->r;
 		other = &insn->l;
 	}
-	if (num == NULL)
+	if (num == nullptr)
 		return false;
 
 	numOp = num;
@@ -50,8 +50,8 @@ bool ExtractNumAndNonNum(minsn_t *insn, mop_t *&numOp, mop_t *&otherOp)
 // side, and once for when the operation was on the right-hand side.
 bool ExtractByOpcodeType(minsn_t *ins, mcode_t mc, minsn_t *&match, mop_t*& noMatch)
 {
-	mop_t *possNoMatch = NULL;
-	minsn_t *possMatch = NULL;
+	mop_t *possNoMatch = nullptr;
+	minsn_t *possMatch = nullptr;
 	
 	// Does the left-hand side contain the operation we're looking for?
 	// Update possNoMatch or possMatch, depending.
@@ -67,7 +67,7 @@ bool ExtractByOpcodeType(minsn_t *ins, mcode_t mc, minsn_t *&match, mop_t*& noMa
 		possMatch = ins->r.d;
 	
 	// If both sides matched, or neither side matched, fail.
-	if (possNoMatch == NULL || possMatch == NULL)
+	if (possNoMatch == nullptr || possMatch == nullptr)
 		return false;
 
 	match = possMatch;
@@ -101,7 +101,7 @@ bool TunnelThroughAnd1(minsn_t *ins, minsn_t *&inner, bool bRequireSize1, mop_t 
 		return false;
 
 	// If requested, pass the operand back to the caller this point
-	if(opInner != NULL)
+	if(opInner != nullptr)
 		*opInner = andNonNum;
 
 	// If the non-numeric operand is an instruction, extract the 
@@ -115,7 +115,7 @@ bool TunnelThroughAnd1(minsn_t *ins, minsn_t *&inner, bool bRequireSize1, mop_t 
 	// Otherwise, if the non-numeric part wasn't a mop_d, check to see whether
 	// the caller specifically wanted a mop_d. If they did, fail. If the caller
 	// was willing to accept another operand type, return true.
-	return opInner != NULL;
+	return opInner != nullptr;
 }
 
 // The obfuscator implements boolean inversion via "x ^ 1". Hex-Rays, or one of
@@ -132,7 +132,7 @@ bool ExtractLogicallyNegatedTerm(minsn_t *ins, minsn_t *&insNegated, mop_t **opN
 	if (ins->opcode == m_lnot)
 	{
 		// Extract the operand, if requested by the caller.
-		if(opNegated != NULL)
+		if(opNegated != nullptr)
 			*opNegated = &ins->l;
 
 		// If the operand was mop_d (i.e., result of another microinstruction),
@@ -149,8 +149,8 @@ bool ExtractLogicallyNegatedTerm(minsn_t *ins, minsn_t *&insNegated, mop_t **opN
 		// on whether the caller was willing to accept a non-mop_d operand.
 		else
 		{
-			insNegated = NULL;
-			return opNegated != NULL;
+			insNegated = nullptr;
+			return opNegated != nullptr;
 		}
 	}
 	
@@ -172,7 +172,7 @@ bool ExtractLogicallyNegatedTerm(minsn_t *ins, minsn_t *&insNegated, mop_t **opN
 		return false;
 
 	// If the caller wanted an operand, give it to them.
-	if (opNegated != NULL)
+	if (opNegated != nullptr)
 		*opNegated = xorNonNum;
 
 	// If the operand was mop_d (result of another microinstruction), extract
@@ -186,8 +186,8 @@ bool ExtractLogicallyNegatedTerm(minsn_t *ins, minsn_t *&insNegated, mop_t **opN
 	
 	// Otherwise, if the operand was not of type mop_d, "success" depends on
 	// whether the caller was willing to accept a non-mop_d operand.
-	insNegated = NULL;
-	return opNegated != NULL;
+	insNegated = nullptr;
+	return opNegated != nullptr;
 }
 
 // This function checks whether two conditional terms are logically opposite. 
@@ -209,7 +209,7 @@ bool AreConditionsOpposite(minsn_t *lhsCond, minsn_t *rhsCond)
 	// lhsCond and rhsCond will be set to NULL if their original terms were
 	// negated, but the thing that was negated wasn't the result of another 
 	// microinstruction.
-	if (lhsCond == NULL || rhsCond == NULL)
+	if (lhsCond == nullptr || rhsCond == nullptr)
 		return false;
 	
 	// If one was negated and the other wasn't, compare them for equality.

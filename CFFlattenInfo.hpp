@@ -3,7 +3,7 @@
 
 struct JZInfo
 {
-	JZInfo() : op(NULL) {};
+	JZInfo() : op(nullptr) {};
 
 	mop_t *op;
 	int nSeen;
@@ -26,25 +26,25 @@ struct CFFlattenInfo
 	int FindBlockByKey(uint64 key);
 	void Clear(bool bFree)
 	{
-		if (bFree && opAssigned != NULL)
+		if (bFree && opAssigned != nullptr)
 			delete opAssigned;
-		opAssigned = NULL;
+		opAssigned = nullptr;
 
-		if (bFree && opCompared != NULL)
+		if (bFree && opCompared != nullptr)
 			delete opCompared;
-		opCompared = NULL;
+		opCompared = nullptr;
 
 		iFirst = -1;
 		iDispatch = -1;
 		uFirst = 0LL;
 		m_WhichFunc = BADADDR;
-		if (bFree && m_DomInfo != NULL)
+		if (bFree && m_DomInfo != nullptr)
 			delete m_DomInfo;
-		m_DomInfo = NULL;
+		m_DomInfo = nullptr;
 
-		if (bFree && m_DominatedClusters != NULL)
+		if (bFree && m_DominatedClusters != nullptr)
 			delete m_DominatedClusters;
-		m_DominatedClusters = NULL;
+		m_DominatedClusters = nullptr;
 
 		m_KeyToBlock.clear();
 		m_BlockToKey.clear();

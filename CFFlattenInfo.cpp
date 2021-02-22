@@ -77,7 +77,7 @@ bool JZInfo::ShouldBlacklist()
 // thing being compared, we use a JZInfo structure to collect the number of 
 // times it's been used in a comparison, and a list of the values it was
 // compared against.
-struct JZCollector : public minsn_visitor_t
+struct JZCollector : minsn_visitor_t
 {
 	std::vector<JZInfo> m_SeenComparisons;
 	int m_nMaxJz;
@@ -155,7 +155,7 @@ mblock_t *GetFirstBlock(mbl_array_t *mba, int &iFirst, int &iDispatch)
 #if UNFLATTENVERBOSE
 			debugmsg("[E] Block %d had %d (!= 1) successors\n", iCurr, mb->nsucc());
 #endif
-			return NULL;
+			return nullptr;
 		}
 		
 		// Get the successor block
@@ -178,7 +178,7 @@ mblock_t *GetFirstBlock(mbl_array_t *mba, int &iFirst, int &iDispatch)
 // This class is used to find all variables that have 32-bit numeric values 
 // assigned to them in the first block (as well as the values that are 
 // assigned to them).
-struct BlockInsnAssignNumberExtractor : public minsn_visitor_t
+struct BlockInsnAssignNumberExtractor : minsn_visitor_t
 {
 	std::vector<std::pair<mop_t *, uint64> > m_SeenAssignments;
 	int visit_minsn()
@@ -199,7 +199,7 @@ struct BlockInsnAssignNumberExtractor : public minsn_visitor_t
 // block. This class is used to locate the "update" variable, by simply looking
 // for a variable whose contents are copied into the "comparison" variable, 
 // which must have had a number assigned to it in the first block.
-struct HandoffVarFinder : public minsn_visitor_t
+struct HandoffVarFinder : minsn_visitor_t
 {
 	// We're looking for assignments to this variable
 	mop_t *m_ComparisonVar;
@@ -253,7 +253,7 @@ struct HandoffVarFinder : public minsn_visitor_t
 // Once we know which variable is the one used for comparisons, look for all
 // jz instructions that compare a number against this variable. This then tells
 // us which number corresponds to which basic block.
-struct JZMapper : public minsn_visitor_t
+struct JZMapper : minsn_visitor_t
 {
 	std::map<uint64, int> &m_KeyToBlock;
 	std::map<int, uint64> &m_BlockToKey;
@@ -438,7 +438,7 @@ bool CFFlattenInfo::GetAssignedAndComparisonVariables(mblock_t *blk)
 	// Find the "first" block in the function, the one immediately before the
 	// control flow switch.
 	mblock_t *first = GetFirstBlock(mba, this->iFirst, this->iDispatch);
-	if (first == NULL)
+	if (first == nullptr)
 	{
 #if UNFLATTENVERBOSE
 		debugmsg("[E] Can't find top-level block in function\n");

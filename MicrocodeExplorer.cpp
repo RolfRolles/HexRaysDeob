@@ -5,7 +5,7 @@
 
 typedef std::shared_ptr<mbl_array_t *> shared_mbl_array_t;
 
-struct mblock_virtual_dumper_t : public vd_printer_t
+struct mblock_virtual_dumper_t : vd_printer_t
 {
 	int nline;
 	int serial;
@@ -32,7 +32,7 @@ struct mblock_virtual_dumper_t : public vd_printer_t
 	}
 };
 
-struct mblock_qstring_dumper_t : public mblock_virtual_dumper_t
+struct mblock_qstring_dumper_t : mblock_virtual_dumper_t
 {
 	qstring qStr;
 	mblock_qstring_dumper_t() : mblock_virtual_dumper_t() {};
@@ -42,7 +42,7 @@ struct mblock_qstring_dumper_t : public mblock_virtual_dumper_t
 	}
 };
 
-struct mblock_dumper_t : public mblock_virtual_dumper_t
+struct mblock_dumper_t : mblock_virtual_dumper_t
 {
 	strvec_t lines;
 	mblock_dumper_t() : mblock_virtual_dumper_t() {};
@@ -58,7 +58,7 @@ struct sample_info_t
 	mblock_dumper_t md;
 	shared_mbl_array_t mba;
 	mba_maturity_t mat;
-	sample_info_t() : cv(NULL), mba(NULL) {}
+	sample_info_t() : cv(nullptr), mba(nullptr) {}
 };
 
 #include <graph.hpp>
@@ -177,7 +177,7 @@ protected:
 
 public:
 	MicrocodeInstructionGraph m_MG;
-	MicrocodeInstructionGraphContainer() : m_TW(NULL), m_GV(NULL) {};
+	MicrocodeInstructionGraphContainer() : m_TW(nullptr), m_GV(nullptr) {};
 
 	bool Display(minsn_t *top, sample_info_t *si, int nBlock, int nSerial)
 	{
@@ -227,7 +227,7 @@ static ssize_t idaapi migr_callback(void *ud, int code, va_list va)
 		mg->resize(microg->m_NumBlocks);
 
 		for (auto &it : microg->m_Edges)
-			mg->add_edge(it.src, it.dst, NULL);
+			mg->add_edge(it.src, it.dst, nullptr);
 
 		result = true;
 	}
@@ -317,7 +317,7 @@ static ssize_t idaapi mgr_callback(void *ud, int code, va_list va)
 
 		for (int i = 0; i < mba->qty; ++i)
 			for (auto dst : mba->get_mblock(i)->succset)
-				mg->add_edge(i, dst, NULL);
+				mg->add_edge(i, dst, nullptr);
 
 		result = true;
 	}
@@ -367,7 +367,7 @@ static bool idaapi ct_keyboard(TWidget * /*v*/, int key, int shift, void *ud)
 			tag_remove(&buf, get_custom_viewer_curline(si->cv, false));
 			const char *pLine = buf.c_str();
 			const char *pDot = strchr(pLine, '.');
-			if (pDot == NULL)
+			if (pDot == nullptr)
 			{
 				warning(
 					"Couldn't find the block number on the current line; was the block empty?\n"
@@ -392,11 +392,11 @@ static bool idaapi ct_keyboard(TWidget * /*v*/, int key, int shift, void *ud)
 			for (i = 0; i < nSerial; ++i)
 			{
 				minsn = minsn->next;
-				if (minsn == NULL)
+				if (minsn == nullptr)
 					break;
 			}
 
-			if (minsn == NULL)
+			if (minsn == nullptr)
 			{
 				if (i == 0)
 					warning(
@@ -424,14 +424,14 @@ static bool idaapi ct_keyboard(TWidget * /*v*/, int key, int shift, void *ud)
 
 static const custom_viewer_handlers_t handlers(
 	ct_keyboard,
-	NULL, // popup
-	NULL, // mouse_moved
-	NULL, // click
-	NULL, // dblclick
-	NULL,
-	NULL, // close
-	NULL, // help
-	NULL);// adjust_place
+	nullptr, // popup
+	nullptr, // mouse_moved
+	nullptr, // click
+	nullptr, // dblclick
+	nullptr,
+	nullptr, // close
+	nullptr, // help
+	nullptr);// adjust_place
 
 ssize_t idaapi ui_callback(void *ud, int code, va_list va)
 {
@@ -485,7 +485,7 @@ mba_maturity_t AskDesiredMaturity()
 void ShowMicrocodeExplorer()
 {
 	func_t *pfn = get_func(get_screen_ea());
-	if (pfn == NULL)
+	if (pfn == nullptr)
 	{
 		warning("Please position the cursor within a function");
 		return;
@@ -496,8 +496,8 @@ void ShowMicrocodeExplorer()
 		return;
 
 	hexrays_failure_t hf;
-	mbl_array_t *mba = gen_microcode(pfn, &hf, NULL, 0, mmat);
-	if (mba == NULL)
+	mbl_array_t *mba = gen_microcode(pfn, &hf, nullptr, 0, mmat);
+	if (mba == nullptr)
 	{
 		warning("#error \"%a: %s", hf.errea, hf.desc().c_str());
 		return;
@@ -520,11 +520,11 @@ void ShowMicrocodeExplorer()
 		&s1, // minplace
 		&s2, // maxplace
 		&s1, // curplace
-		NULL, // renderer_info_t *rinfo
+		nullptr, // renderer_info_t *rinfo
 		&si->md.lines, // ud
 		&handlers, // cvhandlers
 		si, // cvhandlers_ud
-		NULL); // parent
+		nullptr); // parent
 
 	hook_to_notification_point(HT_UI, ui_callback, si);
 #if IDA_SDK_VERSION >= 730

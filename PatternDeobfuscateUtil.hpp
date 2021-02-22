@@ -4,9 +4,9 @@
 
 bool ExtractNumAndNonNum(minsn_t *insn, mop_t *&numOp, mop_t *&otherOp);
 bool ExtractByOpcodeType(minsn_t *ins, mcode_t mc, minsn_t *&match, mop_t*& noMatch);
-bool TunnelThroughAnd1(minsn_t *ins, minsn_t *&inner, bool bRequireSize1 = true, mop_t **opInner = NULL);
+bool TunnelThroughAnd1(minsn_t *ins, minsn_t *&inner, bool bRequireSize1 = true, mop_t **opInner = nullptr);
 bool AreConditionCodesOpposite(mcode_t c1, mcode_t c2);
-bool ExtractLogicallyNegatedTerm(minsn_t *ins, minsn_t *&insNegated, mop_t **opNegated = NULL);
+bool ExtractLogicallyNegatedTerm(minsn_t *ins, minsn_t *&insNegated, mop_t **opNegated = nullptr);
 bool AreConditionsOpposite(minsn_t *lhsCond, minsn_t *rhsCond);
 
 class XorSimplifier
